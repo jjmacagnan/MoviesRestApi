@@ -13,6 +13,8 @@ import com.jjmacagnan.moviesrestapi.model.Movie;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -37,6 +39,8 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.Holder> {
         @Override
         public void onBindViewHolder(@NonNull Holder holder, int position) {
 
+
+
             Movie currMovie = mMovies.get(position);
 
             StringBuilder stringBuilder = new StringBuilder();
@@ -50,7 +54,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.Holder> {
 
             holder.mGenres.setText(stringBuilder);
 
-            Picasso.with(holder.itemView.getContext()).load(currMovie.getPoster_url()).into(holder.mPhoto);
+            if (currMovie.isFromDatabase()) {
+                holder.mPhoto.setImageBitmap(currMovie.getPoster());
+            } else {
+                Picasso.with(holder.itemView.getContext()).load(currMovie.getPoster_url()).into(holder.mPhoto);
+            }
+
         }
 
         @Override
@@ -60,6 +69,19 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.Holder> {
 
         public void addMovie(Movie movie) {
             mMovies.add(movie);
+
+            /*Adiconado ordenção da lista pela média de votos,
+             * conforme enviado pela api*/
+
+            Collections.sort(mMovies, new Comparator<Movie>() {
+                @Override
+                public int compare(Movie o1, Movie o2) {
+                    return o1.getVote_average().compareTo(o2.getVote_average());
+                }
+            });
+
+            Collections.reverse(mMovies);
+
             notifyDataSetChanged();
         }
 

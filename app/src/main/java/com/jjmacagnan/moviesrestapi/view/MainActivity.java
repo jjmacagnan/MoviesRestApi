@@ -119,6 +119,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 if (response.isSuccessful()) {
                     Movie movie = response.body();
 
+                    UpdateDatabase task = new UpdateDatabase();
+                    task.execute(movie);
+
                     intent.putExtra("Movie", movie);
                     startActivity(intent);
                 } else requestError(response.code());
@@ -187,13 +190,13 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
 
     @Override
-    public void onDeliverAllMovie(List<Movie> movies) {
+    public void onDeliverAllMovies(List<Movie> movies) {
 
     }
 
     @Override
-    public void onDeliverMovie(Movie movieList) {
-        mMoviesAdapter.addMovie(movieList);
+    public void onDeliverMovie(Movie movie) {
+        mMoviesAdapter.addMovie(movie);
     }
 
     @Override
@@ -239,6 +242,36 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 Bitmap bitmap = BitmapFactory.decodeStream(stream);
                 movie.setPoster(bitmap);
                 mDatabase.addMovie(movie);
+
+            } catch (Exception e) {
+                Log.d(TAG, e.getMessage());
+            }
+
+            return null;
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public class UpdateDatabase extends AsyncTask<Movie, Void, Void> {
+
+
+        private final String TAG = SaveIntoDatabase.class.getSimpleName();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Movie... params) {
+
+            Movie movie = params[0];
+
+            try {
+                InputStream stream = new URL(movie.getBackdrop_url()).openStream();
+                Bitmap bitmap = BitmapFactory.decodeStream(stream);
+                movie.setBackdrop_photo(bitmap);
+                mDatabase.updateMovie(movie);
 
             } catch (Exception e) {
                 Log.d(TAG, e.getMessage());

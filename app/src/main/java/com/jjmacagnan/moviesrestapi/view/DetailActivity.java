@@ -34,8 +34,11 @@ public class DetailActivity extends AppCompatActivity {
         mTagline.setText(movie.getTagline());
         mTagline.setText(movie.getTagline());
 
-
-        Picasso.with(getApplicationContext()).load(movie.getBackdrop_url()).into(mPhoto);
+        if (movie.isFromDatabase()) {
+            mPhoto.setImageBitmap(movie.getBackdrop_photo());
+        } else {
+            Picasso.with(getApplicationContext()).load(movie.getBackdrop_url()).into(mPhoto);
+        }
     }
 
     private void configViews() {

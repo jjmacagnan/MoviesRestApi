@@ -1,4 +1,4 @@
-package com.example.moviesrestapi;
+package com.jjmacagnan.moviesrestapi;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

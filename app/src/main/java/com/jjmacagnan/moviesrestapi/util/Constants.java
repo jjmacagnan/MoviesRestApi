@@ -36,7 +36,12 @@ public class Constants {
                 TITLE + " TEXT," +
                 POSTER_URL + " TEXT," +
                 POSTER + " blob," +
-                GENRES + " TEXT)";
+                GENRES + " TEXT," +
+                BACKDROP_URL + " TEXT," +
+                BACKDROP + " blob," +
+                OVERVIEW + " TEXT," +
+                RELEASE_DATE + " TEXT," +
+                TAGLINE + " TEXT)";
     }
 
     public static final class REFERENCE {
