@@ -18,7 +18,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.jjmacagnan.moviesrestapi.R;
-import com.jjmacagnan.moviesrestapi.adapter.MoviesAdapter;
+import com.jjmacagnan.moviesrestapi.adapter.MovieAdapter;
 import com.jjmacagnan.moviesrestapi.api.ApiService;
 import com.jjmacagnan.moviesrestapi.api.ServiceFactory;
 import com.jjmacagnan.moviesrestapi.database.MovieDatabase;
@@ -28,6 +28,7 @@ import com.jjmacagnan.moviesrestapi.util.NetworkStateReceiver;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.sql.SQLDataException;
 import java.util.List;
 
 import retrofit2.Call;
@@ -35,10 +36,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapter.MovieClickListener, MovieFetchListener {
+public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieClickListener, MovieFetchListener {
 
-    //private static final String TAG = MainActivity.class.getSimpleName();
-    private MoviesAdapter mMoviesAdapter;
+    private MovieAdapter mMovieAdapter;
     private MovieDatabase mDatabase;
     private Button mReload;
     private ProgressDialog mDialog;
@@ -65,13 +65,13 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     private void loadMovieFeed() {
 
-        mMoviesAdapter.reset();
+        mMovieAdapter.reset();
         showMessage(getString(R.string.loading_movie_data));
 
         if (NetworkStateReceiver.isNetworkAvailable()) {
             getMovieList();
         } else {
-            getFeedFromDatabase();
+            getMoviesFromDatabase();
         }
     }
 
@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mDialog.show();
     }
 
-    private void getFeedFromDatabase() {
+    private void getMoviesFromDatabase() {
         mDatabase.fetchMovies(this);
     }
 
@@ -96,48 +96,53 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mRecyclerView.setRecycledViewPool(new RecyclerView.RecycledViewPool());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
 
-        mMoviesAdapter = new MoviesAdapter(this);
+        mMovieAdapter = new MovieAdapter(this);
 
-        mRecyclerView.setAdapter(mMoviesAdapter);
+        mRecyclerView.setAdapter(mMovieAdapter);
     }
 
     @Override
     public void onClick(int position) {
-        final Movie selectedMovie = mMoviesAdapter.getSelectedMovie(position);
-        final Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+        Movie selectedMovie = mMovieAdapter.getSelectedMovie(position);
 
         showMessage(getString(R.string.loading_movie_details));
 
-        ApiService service = ServiceFactory.getInstance();
+        try {
+            mDatabase.fetchMovie(this, selectedMovie);
+        } catch (Exception e) {
+            e.printStackTrace();
 
-        Call<Movie> movieCall = service.getMovie(selectedMovie.getId());
+            ApiService service = ServiceFactory.getInstance();
 
-        movieCall.enqueue(new Callback<Movie>() {
-            @Override
-            public void onResponse(@NonNull Call<Movie> call, @NonNull Response<Movie> response) {
+            Call<Movie> movieCall = service.getMovie(selectedMovie.getId());
 
-                if (response.isSuccessful()) {
-                    Movie movie = response.body();
+            movieCall.enqueue(new Callback<Movie>() {
+                @Override
+                public void onResponse(@NonNull Call<Movie> call, @NonNull Response<Movie> response) {
 
-                    UpdateDatabase task = new UpdateDatabase();
-                    task.execute(movie);
+                    if (response.isSuccessful()) {
+                        Movie movie = response.body();
 
-                    intent.putExtra("Movie", movie);
-                    startActivity(intent);
-                } else requestError(response.code());
+                        Intent intent = new Intent(MainActivity.this, DetailActivity.class);
 
-                mDialog.dismiss();
+                        intent.putExtra("overview", movie.getOverview());
+                        intent.putExtra("release_date", movie.getRelease_date());
+                        intent.putExtra("tagline", movie.getTagline());
+                        intent.putExtra("backdrop_photo", movie.getBackdrop_photo());
+                        intent.putExtra("backdrop_url", movie.getBackdrop_url());
 
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Movie> call, @NonNull Throwable t) {
-                mDialog.dismiss();
-                Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                        startActivity(intent);
 
 
+                    } else requestError(response.code());
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Movie> call, @NonNull Throwable t) {
+
+                }
+            });
+        }
     }
 
     private void requestError(int code) {
@@ -170,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                         SaveIntoDatabase task = new SaveIntoDatabase();
                         task.execute(movie);
 
-                        mMoviesAdapter.addMovie(movie);
+                        mMovieAdapter.addMovie(movie);
                     }
                 } else {
                     requestError(response.code());
@@ -188,7 +193,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         });
     }
 
-
     @Override
     public void onDeliverAllMovies(List<Movie> movies) {
 
@@ -196,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     @Override
     public void onDeliverMovie(Movie movie) {
-        mMoviesAdapter.addMovie(movie);
+        mMovieAdapter.addMovie(movie);
     }
 
     @Override
@@ -204,6 +208,19 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mDialog.dismiss();
     }
 
+    @Override
+    public void onDetailsMovie(Movie mMovie) {
+        Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+
+        intent.putExtra("isFromDatabase", mMovie.isFromDatabase());
+        intent.putExtra("overview", mMovie.getOverview());
+        intent.putExtra("release_date", mMovie.getRelease_date());
+        intent.putExtra("tagline", mMovie.getTagline());
+        intent.putExtra("backdrop_photo", mMovie.getBackdrop_photo());
+        intent.putExtra("backdrop_url", mMovie.getBackdrop_url());
+
+        startActivity(intent);
+    }
 
     @Override
     protected void onResume() {
@@ -226,10 +243,20 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
 
         private final String TAG = SaveIntoDatabase.class.getSimpleName();
+        ProgressDialog mDialog;
+
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+
+            mDialog = new ProgressDialog(MainActivity.this);
+            mDialog.setMessage(getString(R.string.update_database));
+            mDialog.setCancelable(true);
+            mDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mDialog.setIndeterminate(true);
+
+            mDialog.show();
         }
 
         @Override
@@ -243,11 +270,41 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 movie.setPoster(bitmap);
                 mDatabase.addMovie(movie);
 
+
+                ApiService service = ServiceFactory.getInstance();
+
+                Call<Movie> movieCall = service.getMovie(movie.getId());
+
+                movieCall.enqueue(new Callback<Movie>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Movie> call, @NonNull Response<Movie> response) {
+
+                        if (response.isSuccessful()) {
+                            Movie movie = response.body();
+
+                            UpdateDatabase task = new UpdateDatabase();
+                            task.execute(movie);
+
+                        } else requestError(response.code());
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<Movie> call, @NonNull Throwable t) {
+
+                    }
+                });
             } catch (Exception e) {
                 Log.d(TAG, e.getMessage());
             }
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            mDialog.dismiss();
         }
     }
 

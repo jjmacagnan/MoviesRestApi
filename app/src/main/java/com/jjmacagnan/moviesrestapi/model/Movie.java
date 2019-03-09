@@ -151,39 +151,59 @@ public class Movie implements Serializable {
         isFromDatabase = fromDatabase;
     }
 
-//    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-//
-//        out.writeObject(id);
-//        out.writeObject(backdrop_url);
-//        out.writeObject(overview);
-//        out.writeObject(tagline);
-//        out.writeObject(release_date);
-//        out.writeObject(vote_average);
-//        out.writeObject(title);
-//        out.writeObject(genres);
-//        out.writeObject(poster_url);
-//
-//        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-//        picture.compress(Bitmap.CompressFormat.PNG, 0, byteStream);
-//        byte bitmapBytes[] = byteStream.toByteArray();
-//        out.write(bitmapBytes, 0, bitmapBytes.length);
-//    }
-//
-//    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-//
-//        category = (String) in.readObject();
-//        price = (Double) in.readObject();
-//        instructions = (String) in.readObject();
-//        photo = (String) in.readObject();
-//        name = (String) in.readObject();
-//        productId = (Integer) in.readObject();
-//
-//        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-//        int b;
-//        while ((b = in.read()) != -1)
-//            byteStream.write(b);
-//        byte bitmapBytes[] = byteStream.toByteArray();
-//        picture = BitmapFactory.decodeByteArray(bitmapBytes, 0,
-//                bitmapBytes.length);
-//    }
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+
+        out.writeObject(id);
+        out.writeObject(vote_average);
+        out.writeObject(title);
+        out.writeObject(poster_url);
+        out.writeObject(genres);
+        out.writeObject(backdrop_url);
+        out.writeObject(overview);
+        out.writeObject(release_date);
+        out.writeObject(tagline);
+
+
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        byte bitmapPosterBytes[] = byteStream.toByteArray();
+        byte bitmapBackdropBytes[] = byteStream.toByteArray();
+
+        if (poster != null) {
+            poster.compress(Bitmap.CompressFormat.PNG, 0, byteStream);
+        }
+
+        if (backdrop_photo != null) {
+            backdrop_photo.compress(Bitmap.CompressFormat.PNG, 0, byteStream);
+        }
+
+        out.write(bitmapBackdropBytes, 0, bitmapBackdropBytes.length);
+        out.write(bitmapPosterBytes, 0, bitmapPosterBytes.length);
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+
+        id = (Integer) in.readObject();
+        vote_average = (Double) in.readObject();
+        title = (String) in.readObject();
+        poster_url = (String) in.readObject();
+        genres = (String[]) in.readObject();
+        backdrop_url = (String) in.readObject();
+        overview = (String) in.readObject();
+        release_date = (String) in.readObject();
+        tagline = (String) in.readObject();
+
+
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        int b;
+        while ((b = in.read()) != -1)
+            byteStream.write(b);
+        byte bitmapPosterBytes[] = byteStream.toByteArray();
+        byte bitmapBackdropBytes[] = byteStream.toByteArray();
+
+        poster = BitmapFactory.decodeByteArray(bitmapPosterBytes, 0,
+                bitmapPosterBytes.length);
+
+        backdrop_photo = BitmapFactory.decodeByteArray(bitmapBackdropBytes, 0,
+                bitmapBackdropBytes.length);
+    }
 }

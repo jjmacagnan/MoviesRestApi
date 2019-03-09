@@ -24,7 +24,6 @@ import java.util.Comparator;
 import java.util.List;
 
 
-
 public class MovieDatabase extends SQLiteOpenHelper {
 
     private static final String TAG = MovieDatabase.class.getSimpleName();
@@ -54,7 +53,7 @@ public class MovieDatabase extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(Constants.DATABASE.ID, movie.getId());
-        values.put(Constants.DATABASE.VOTE_AVERAGE,Double.toString(movie.getVote_average()));
+        values.put(Constants.DATABASE.VOTE_AVERAGE, Double.toString(movie.getVote_average()));
         values.put(Constants.DATABASE.TITLE, movie.getTitle());
         values.put(Constants.DATABASE.POSTER_URL, movie.getPoster_url());
         values.put(Constants.DATABASE.POSTER, ImageUtils.getPictureByteOfArray(movie.getPoster()));
@@ -89,23 +88,29 @@ public class MovieDatabase extends SQLiteOpenHelper {
     }
 
     public void fetchMovies(MovieFetchListener listener) {
-        MovieFetcher fetcher = new MovieFetcher(listener, this.getWritableDatabase());
+        MoviesFetcher fetcher = new MoviesFetcher(listener, this.getWritableDatabase());
         fetcher.start();
     }
 
-    public class MovieFetcher extends Thread {
+    public void fetchMovie(MovieFetchListener listener, Movie movie) {
+        MovieFetcher fetcher = new MovieFetcher(listener, this.getWritableDatabase(), movie);
+        fetcher.start();
+    }
+
+
+    public class MoviesFetcher extends Thread {
 
         private final MovieFetchListener mListener;
         private final SQLiteDatabase mDb;
 
-        MovieFetcher(MovieFetchListener listener, SQLiteDatabase db) {
+        MoviesFetcher(MovieFetchListener listener, SQLiteDatabase db) {
             mListener = listener;
             mDb = db;
         }
 
         @Override
         public void run() {
-            @SuppressLint("Recycle") Cursor cursor = mDb.rawQuery(Constants.DATABASE.GET_MOVIES_QUERY, null);
+            Cursor cursor = mDb.rawQuery(Constants.DATABASE.GET_MOVIES_QUERY, null);
 
             final List<Movie> moviesList = new ArrayList<>();
 
@@ -118,9 +123,12 @@ public class MovieDatabase extends SQLiteOpenHelper {
                         movie.setId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.ID))));
                         movie.setVote_average(Double.parseDouble(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.VOTE_AVERAGE))));
                         movie.setTitle(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.TITLE)));
-                        movie.setPoster_url(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.POSTER_URL)));
                         movie.setPoster(ImageUtils.getBitmapFromByte(cursor.getBlob(cursor.getColumnIndex(Constants.DATABASE.POSTER))));
                         movie.setGenres(new String[]{cursor.getString(cursor.getColumnIndex(Constants.DATABASE.GENRES))});
+                        movie.setBackdrop_photo(ImageUtils.getBitmapFromByte(cursor.getBlob(cursor.getColumnIndex(Constants.DATABASE.BACKDROP))));
+                        movie.setOverview(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.OVERVIEW)));
+                        movie.setRelease_date(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.RELEASE_DATE)));
+                        movie.setTagline(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.TAGLINE)));
 
                         moviesList.add(movie);
                         publishMovie(movie);
@@ -155,6 +163,51 @@ public class MovieDatabase extends SQLiteOpenHelper {
                     mListener.onDeliverMovie(movies);
                 }
             });
+        }
+    }
+
+    public class MovieFetcher extends Thread {
+
+        private final MovieFetchListener mListener;
+        private final SQLiteDatabase mDb;
+        private final Movie mMovie;
+
+        MovieFetcher(MovieFetchListener listener, SQLiteDatabase db, Movie movie) {
+            mListener = listener;
+            mDb = db;
+            mMovie = movie;
+        }
+
+        @Override
+        public void run() {
+            Cursor cursor = mDb.rawQuery(Constants.DATABASE.GET_MOVIE + mMovie.getId(), null);
+
+            if (cursor.getCount() > 0) {
+
+                if (cursor.moveToFirst()) {
+                    do {
+                        mMovie.setFromDatabase(true);
+                        mMovie.setBackdrop_photo(ImageUtils.getBitmapFromByte(cursor.getBlob(cursor.getColumnIndex(Constants.DATABASE.BACKDROP))));
+                        mMovie.setOverview(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.OVERVIEW)));
+                        mMovie.setRelease_date(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.RELEASE_DATE)));
+                        mMovie.setTagline(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.TAGLINE)));
+
+
+                    } while (cursor.moveToNext());
+
+                }
+            }
+
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onDetailsMovie(mMovie);
+                    mListener.onHideDialog();
+                }
+            });
+
+
         }
     }
 }

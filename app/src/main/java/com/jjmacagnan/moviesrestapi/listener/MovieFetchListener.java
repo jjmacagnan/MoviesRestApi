@@ -12,4 +12,6 @@ public interface MovieFetchListener {
     void onDeliverMovie(Movie movie);
 
     void onHideDialog();
+
+    void onDetailsMovie(Movie mMovie);
 }

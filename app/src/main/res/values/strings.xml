@@ -10,5 +10,8 @@
     <string name="instruction">Instruction:</string>
     <string name="loading_movie_data">Loading Movie Data…</string>
     <string name="loading_movie_details">Loading Movie Details…</string>
+    <string name="update_database">Update Movie Database…</string>
     <string name="reload">Reload</string>
+    <string name="revenue">Revenue</string>
+    <string name="popularity">Popularity</string>
 </resources>

@@ -19,12 +19,12 @@ import java.util.List;
 
 
 
-public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.Holder> {
+public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.Holder> {
 
         private final MovieClickListener mListener;
         private List<Movie> mMovies;
 
-        public MoviesAdapter(MovieClickListener listener) {
+        public MovieAdapter(MovieClickListener listener) {
             mMovies = new ArrayList<>();
             mListener = listener;
         }

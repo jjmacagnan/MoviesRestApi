@@ -16,6 +16,8 @@ public class Constants {
 
         public static final String GET_MOVIES_QUERY = "SELECT * FROM " + TABLE_NAME;
 
+        public static final String GET_MOVIE = "SELECT backdrop, overview, release_date, tagline FROM "  + TABLE_NAME + " WHERE ID = ";
+
         public static final String ID = "id";
         public static final String VOTE_AVERAGE = "vote_average";
         public static final String TITLE = "title";
@@ -49,7 +51,7 @@ public class Constants {
     }
 
     public static final class Config {
-        public static final String PACKAGE_NAME = "com.jjmacagnan.moviesrestapi.";
+        public static final String PACKAGE_NAME = "com.jjmacagnan.moviesrestapi.model.";
     }
 
 
