@@ -9,15 +9,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jjmacagnan.moviesrestapi.R;
-import com.jjmacagnan.moviesrestapi.model.Movie;
-import com.jjmacagnan.moviesrestapi.util.Constants;
 import com.squareup.picasso.Picasso;
 
 
 public class DetailActivity extends AppCompatActivity {
 
     private ImageView mPhoto;
-    private TextView mOverview, mReleaseDate, mTagline;
+    private TextView mOverview, mReleaseDate, mTagline, mPopularity, mRevenue;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,12 +29,16 @@ public class DetailActivity extends AppCompatActivity {
         String release_date = intent.getStringExtra("release_date");
         String tagline = intent.getStringExtra("tagline");
         String backdrop_url = intent.getStringExtra("backdrop_url");
+        String popularity = String.valueOf(intent.getDoubleExtra("popularity", 0.0));
+        String revenue = String.valueOf(intent.getIntExtra("revenue", 0));
 
         configViews();
 
         mReleaseDate.setText(release_date);
         mOverview.setText(overview);
         mTagline.setText(tagline);
+        mPopularity.setText(popularity);
+        mRevenue.setText(revenue);
 
         if (isFromDatase) {
             Bitmap bitmap = intent.getParcelableExtra("backdrop_photo");
@@ -52,6 +54,8 @@ public class DetailActivity extends AppCompatActivity {
         mOverview = findViewById(R.id.overview);
         mReleaseDate = findViewById(R.id.release_date);
         mTagline = findViewById(R.id.tagline);
+        mPopularity = findViewById(R.id.popularity);
+        mRevenue = findViewById(R.id.revenue);
 
     }
 }

@@ -16,7 +16,7 @@ public class Constants {
 
         public static final String GET_MOVIES_QUERY = "SELECT * FROM " + TABLE_NAME;
 
-        public static final String GET_MOVIE = "SELECT backdrop, overview, release_date, tagline FROM "  + TABLE_NAME + " WHERE ID = ";
+        public static final String GET_MOVIE = "SELECT backdrop, overview, popularity, release_date, revenue, tagline FROM "  + TABLE_NAME + " WHERE ID = ";
 
         public static final String ID = "id";
         public static final String VOTE_AVERAGE = "vote_average";
@@ -29,6 +29,8 @@ public class Constants {
         public static final String OVERVIEW = "overview";
         public static final String RELEASE_DATE = "release_date";
         public static final String TAGLINE = "tagline";
+        public static final String REVENUE = "revenue";
+        public static final String POPULARITY = "popularity";
 
 
 
@@ -42,7 +44,9 @@ public class Constants {
                 BACKDROP_URL + " TEXT," +
                 BACKDROP + " blob," +
                 OVERVIEW + " TEXT," +
+                POPULARITY + " TEXT," +
                 RELEASE_DATE + " TEXT," +
+                REVENUE + " TEXT," +
                 TAGLINE + " TEXT)";
     }
 

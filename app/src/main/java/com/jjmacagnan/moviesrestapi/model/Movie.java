@@ -41,9 +41,17 @@ public class Movie implements Serializable {
     @Expose
     private String overview;
 
+    @SerializedName("popularity")
+    @Expose
+    private Double popularity;
+
     @SerializedName("release_date")
     @Expose
     private String release_date;
+
+    @SerializedName("revenue")
+    @Expose
+    private int revenue;
 
     @SerializedName("tagline")
     @Expose
@@ -111,12 +119,29 @@ public class Movie implements Serializable {
         this.overview = overview;
     }
 
+    public Double getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(Double popularity) {
+        this.popularity = popularity;
+    }
+
+
     public String getRelease_date() {
         return release_date;
     }
 
     public void setRelease_date(String release_date) {
         this.release_date = release_date;
+    }
+
+    public int getRevenue() {
+        return revenue;
+    }
+
+    public void setRevenue(int revenue) {
+        this.revenue = revenue;
     }
 
     public String getTagline() {
@@ -160,7 +185,9 @@ public class Movie implements Serializable {
         out.writeObject(genres);
         out.writeObject(backdrop_url);
         out.writeObject(overview);
+        out.writeObject(popularity);
         out.writeObject(release_date);
+        out.writeObject(revenue);
         out.writeObject(tagline);
 
 
@@ -189,7 +216,9 @@ public class Movie implements Serializable {
         genres = (String[]) in.readObject();
         backdrop_url = (String) in.readObject();
         overview = (String) in.readObject();
+        popularity = (Double) in.readObject();
         release_date = (String) in.readObject();
+        revenue = (int) in.readObject();
         tagline = (String) in.readObject();
 
 

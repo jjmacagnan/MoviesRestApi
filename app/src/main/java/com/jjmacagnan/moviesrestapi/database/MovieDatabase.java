@@ -1,7 +1,6 @@
 package com.jjmacagnan.moviesrestapi.database;
 
 
-import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -12,10 +11,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.jjmacagnan.moviesrestapi.util.ImageUtils;
 import com.jjmacagnan.moviesrestapi.listener.MovieFetchListener;
 import com.jjmacagnan.moviesrestapi.model.Movie;
 import com.jjmacagnan.moviesrestapi.util.Constants;
+import com.jjmacagnan.moviesrestapi.util.ImageUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,7 +74,9 @@ public class MovieDatabase extends SQLiteOpenHelper {
         values.put(Constants.DATABASE.BACKDROP_URL, movie.getBackdrop_url());
         values.put(Constants.DATABASE.BACKDROP, ImageUtils.getPictureByteOfArray(movie.getBackdrop_photo()));
         values.put(Constants.DATABASE.OVERVIEW, movie.getOverview());
+        values.put(Constants.DATABASE.POPULARITY, movie.getPopularity());
         values.put(Constants.DATABASE.RELEASE_DATE, movie.getRelease_date());
+        values.put(Constants.DATABASE.REVENUE, movie.getRevenue());
         values.put(Constants.DATABASE.TAGLINE, movie.getTagline());
 
 
@@ -127,7 +128,9 @@ public class MovieDatabase extends SQLiteOpenHelper {
                         movie.setGenres(new String[]{cursor.getString(cursor.getColumnIndex(Constants.DATABASE.GENRES))});
                         movie.setBackdrop_photo(ImageUtils.getBitmapFromByte(cursor.getBlob(cursor.getColumnIndex(Constants.DATABASE.BACKDROP))));
                         movie.setOverview(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.OVERVIEW)));
+                        movie.setPopularity(Double.parseDouble(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.POPULARITY))));
                         movie.setRelease_date(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.RELEASE_DATE)));
+                        movie.setRevenue(Integer.parseInt(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.REVENUE))));
                         movie.setTagline(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.TAGLINE)));
 
                         moviesList.add(movie);
@@ -189,7 +192,9 @@ public class MovieDatabase extends SQLiteOpenHelper {
                         mMovie.setFromDatabase(true);
                         mMovie.setBackdrop_photo(ImageUtils.getBitmapFromByte(cursor.getBlob(cursor.getColumnIndex(Constants.DATABASE.BACKDROP))));
                         mMovie.setOverview(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.OVERVIEW)));
+                        mMovie.setPopularity(Double.parseDouble(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.POPULARITY))));
                         mMovie.setRelease_date(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.RELEASE_DATE)));
+                        mMovie.setRevenue(Integer.parseInt(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.REVENUE))));
                         mMovie.setTagline(cursor.getString(cursor.getColumnIndex(Constants.DATABASE.TAGLINE)));
 
 

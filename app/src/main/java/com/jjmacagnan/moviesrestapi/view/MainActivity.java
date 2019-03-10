@@ -28,7 +28,6 @@ import com.jjmacagnan.moviesrestapi.util.NetworkStateReceiver;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.sql.SQLDataException;
 import java.util.List;
 
 import retrofit2.Call;
@@ -125,8 +124,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
                         Intent intent = new Intent(MainActivity.this, DetailActivity.class);
 
+                        assert movie != null;
                         intent.putExtra("overview", movie.getOverview());
+                        intent.putExtra("popularity", movie.getPopularity());
                         intent.putExtra("release_date", movie.getRelease_date());
+                        intent.putExtra("revenue", movie.getRevenue());
                         intent.putExtra("tagline", movie.getTagline());
                         intent.putExtra("backdrop_photo", movie.getBackdrop_photo());
                         intent.putExtra("backdrop_url", movie.getBackdrop_url());
@@ -214,7 +216,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         intent.putExtra("isFromDatabase", mMovie.isFromDatabase());
         intent.putExtra("overview", mMovie.getOverview());
+        intent.putExtra("popularity", mMovie.getPopularity());
         intent.putExtra("release_date", mMovie.getRelease_date());
+        intent.putExtra("revenue", mMovie.getRevenue());
         intent.putExtra("tagline", mMovie.getTagline());
         intent.putExtra("backdrop_photo", mMovie.getBackdrop_photo());
         intent.putExtra("backdrop_url", mMovie.getBackdrop_url());
